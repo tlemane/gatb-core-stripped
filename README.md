@@ -1,1 +1,0 @@
-# gatb-core-stripped
