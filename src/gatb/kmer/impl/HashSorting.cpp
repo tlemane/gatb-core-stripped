@@ -232,25 +232,25 @@ void HashSortingCommand<span>::execute()
   //cout << this->_parti_num << " END SORT "<< endl;
   //executeDump();
 
-  auto start = high_resolution_clock::now();
+    //auto start = high_resolution_clock::now();
 	executeRead ();
-	auto end = high_resolution_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(end - start);
-	cout << "READ : Part" << to_string(this->_parti_num) << " " << time_span.count() << endl;
+	//auto end = high_resolution_clock::now();
+    //duration<double> time_span = duration_cast<duration<double>>(end - start);
+	//cout << "READ : Part" << to_string(this->_parti_num) << " " << time_span.count() << endl;
    
-	start = high_resolution_clock::now();
+	//start = high_resolution_clock::now();
 	executeSort ();
-	end = high_resolution_clock::now();
-  duration<double> time_span2 = duration_cast<duration<double>>(end - start);
-	cout << "SORT : Part" << to_string(this->_parti_num) << " " << time_span2.count() << endl;
+	//end = high_resolution_clock::now();
+    //duration<double> time_span2 = duration_cast<duration<double>>(end - start);
+	//cout << "SORT : Part" << to_string(this->_parti_num) << " " << time_span2.count() << endl;
   
 	
-	start = high_resolution_clock::now();
+	//start = high_resolution_clock::now();
 	executeDump ();
-	end = high_resolution_clock::now();
-  duration<double> time_span3 = duration_cast<duration<double>>(end - start);
-	cout << "DUMP : Part" << to_string(this->_parti_num) << " " << time_span3.count() << endl;
-  FREE(_r_idx);
+	//end = high_resolution_clock::now();
+    //duration<double> time_span3 = duration_cast<duration<double>>(end - start);
+	//cout << "DUMP : Part" << to_string(this->_parti_num) << " " << time_span3.count() << endl;
+    FREE(_r_idx);
 //  FREE(_array);
   this->_progress->inc(this->_pInfo.getNbKmer(this->_parti_num));
   this->_processor->endPart(this->_pass_num, this->_parti_num);
