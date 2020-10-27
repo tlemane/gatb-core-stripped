@@ -1440,24 +1440,9 @@ void PartitionsByVectorCommand<span>::execute ()
 
     /** We have 3 phases here: read, sort and dump. */
 		
-		auto start = high_resolution_clock::now();
 		executeRead ();
-		auto end = high_resolution_clock::now();
-		duration<double> time_span = duration_cast<duration<double>>(end - start);
-		cout << "READ : Part" << to_string(this->_parti_num) << " " << time_span.count() << endl;
-    
-		start = high_resolution_clock::now();
 		executeSort ();
-		end = high_resolution_clock::now();
-		duration<double> time_span2 = duration_cast<duration<double>>(end - start);
-		cout << "SORT : Part" << to_string(this->_parti_num) << " " << time_span2.count() << endl;
-	  
-		
-		start = high_resolution_clock::now();
 		executeDump ();
-		end = high_resolution_clock::now();
-		duration<double> time_span3 = duration_cast<duration<double>>(end - start);
-		cout << "DUMP : Part" << to_string(this->_parti_num) << " " << time_span3.count() << endl;
 
     /** We cleanup tables. */
     FREE (_radix_sizes) ;

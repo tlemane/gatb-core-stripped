@@ -225,32 +225,12 @@ void HashSortingCommand<span>::execute()
 
   //_r_idx = (uint64_t *)CALLOC(256, sizeof(uint64_t));
   _r_idx = (uint64_t*)CALLOC(1, sizeof(uint64_t));
-  //cout << this->_parti_num << " READ "<< endl;
-  //executeRead();
-  //cout << this->_parti_num << " END GO SORT "<< endl;
-  //executeSort();
-  //cout << this->_parti_num << " END SORT "<< endl;
-  //executeDump();
-
-    //auto start = high_resolution_clock::now();
-	executeRead ();
-	//auto end = high_resolution_clock::now();
-    //duration<double> time_span = duration_cast<duration<double>>(end - start);
-	//cout << "READ : Part" << to_string(this->_parti_num) << " " << time_span.count() << endl;
-   
-	//start = high_resolution_clock::now();
-	executeSort ();
-	//end = high_resolution_clock::now();
-    //duration<double> time_span2 = duration_cast<duration<double>>(end - start);
-	//cout << "SORT : Part" << to_string(this->_parti_num) << " " << time_span2.count() << endl;
   
-	
-	//start = high_resolution_clock::now();
-	executeDump ();
-	//end = high_resolution_clock::now();
-    //duration<double> time_span3 = duration_cast<duration<double>>(end - start);
-	//cout << "DUMP : Part" << to_string(this->_parti_num) << " " << time_span3.count() << endl;
-    FREE(_r_idx);
+  executeRead ();
+  executeSort ();
+  executeDump ();
+    
+  FREE(_r_idx);
 //  FREE(_array);
   this->_progress->inc(this->_pInfo.getNbKmer(this->_parti_num));
   this->_processor->endPart(this->_pass_num, this->_parti_num);
