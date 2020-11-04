@@ -81,12 +81,15 @@ file (GLOB_RECURSE  ComponentFiles  *  ${PROJECT_BINARY_DIR}/src/gatb/*.cpp)
 # We add the compilation options for the library
 add_definitions (${gatb-core-flags})
 
-include_directories (${gatb-core-includes})
-
+include_directories (${gatb-core-includes} ${PROJECT_BINARY_DIR/thirdparty/LZ4/src/LZ4/include})
+link_directories(${PROJECT_BINARY_DIR}/thirdparty/LZ4/src/LZ4-build/)
 add_library    (gatbcore-static  STATIC  ${ComponentFiles} )
 #add_library   (gatbcore-dynamic SHARED  ${ComponentFiles} )
 
 set_target_properties  (gatbcore-static   PROPERTIES OUTPUT_NAME  gatbcore  clean_direct_output 1)
+
+add_dependencies(gatbcore-static LZ4)
+
 #set_target_properties (gatbcore-dynamic  PROPERTIES OUTPUT_NAME  gatbcore  clean_direct_output 1)
 
 ################################################################################
