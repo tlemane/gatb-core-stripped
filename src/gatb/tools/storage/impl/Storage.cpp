@@ -389,6 +389,9 @@ void SuperKmerBinFiles::openFiles( const char* mode)
 {
 	_files.resize(_nb_files,0);
 	_synchros.resize(_nb_files,0);
+	_foutputs.resize(_nb_files,0);
+	_outputs.resize(_nb_files, 0);
+	_inputs.resize(_nb_files, 0);
 	
 	system::impl::System::file().mkdir(_path, 0755);
 
@@ -398,7 +401,9 @@ void SuperKmerBinFiles::openFiles( const char* mode)
 		ss << _basefilename << "." << ii << ".lz4";
 		
 		if (mode == "rb")
+		{
 			_inputs[ii] = new lz4_stream::istream(_path + "/" + ss.str());
+		}
 		else if (mode == "wb")
 		{
 			_foutputs[ii] = new ofstream(_path + "/" + ss.str(), ios::binary | ios::out);
@@ -425,6 +430,11 @@ std::string SuperKmerBinFiles::getFileName(int fileId)
 int SuperKmerBinFiles::readBlock(unsigned char ** block, unsigned int* max_block_size, unsigned int* nb_bytes_read, int file_id)
 {
 	_synchros[file_id]->lock();
+	
+	if (!_inputs[file_id])
+	{
+		openFile("rb", file_id);
+	}
 	
 	//block header
 	//int nbr = _files[file_id]->fread(nb_bytes_read, sizeof(*max_block_size),1);
