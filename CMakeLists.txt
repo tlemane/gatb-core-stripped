@@ -208,7 +208,7 @@ set (gatb-core-flags ${LIBRARY_COMPILE_DEFINITIONS})
 
 # We define the include directories used for linking binary based on gatb core
 # Note that we need to add boost include dependency (not working otherwise with clang)
-set (gatb-core-includes ${PROJECT_BINARY_DIR}/include  ${PROJECT_BINARY_DIR}/include/${CMAKE_BUILD_TYPE} ${PROJECT_SOURCE_DIR}/src  ${PROJECT_SOURCE_DIR}/thirdparty ${gatb-core-extra-libraries-inc})
+set (gatb-core-includes ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/thirdparty/LZ4/src/LZ4/lib ${PROJECT_BINARY_DIR}/include/${CMAKE_BUILD_TYPE} ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/thirdparty ${gatb-core-extra-libraries-inc})
 
 # We define the libraries used for linking binary based on gatb core
 set (gatb-core-libraries   gatbcore-static  dl  pthread  z ${gatb-core-extra-libraries} lz4)
