@@ -310,7 +310,7 @@ Storage::istream::~istream ()
 ////////// SuperKmerBinFiles //////////
 ///////////////////////////////////////
 	
-SuperKmerBinFiles::SuperKmerBinFiles(const std::string& path,const std::string& name, size_t nb_files) : _basefilename(name), _path(path),_nb_files(nb_files)
+SuperKmerBinFiles::SuperKmerBinFiles(const std::string& path,const std::string& name, size_t nb_files, bool lz4) : _basefilename(name), _path(path),_nb_files(nb_files), _lz4(lz4)
 {
 	_nbKmerperFile.resize(_nb_files,0);
 	_FileSize.resize(_nb_files,0);
@@ -337,8 +337,7 @@ SuperKmerBinFiles::SuperKmerBinFiles(const std::string& prefix)
 		_foutputs.resize(_nb_files, 0);
 		_inputs.resize(_nb_files, 0);
 		_outputs.resize(_nb_files, 0);
-    	_synchros.resize(_nb_files,0);
-
+ 	   	_synchros.resize(_nb_files,0);
         for(unsigned int ii=0;ii<_files.size();ii++)
         {
             getline (myfile,line); _nbKmerperFile[ii] = atol(line.c_str());
@@ -371,16 +370,23 @@ void SuperKmerBinFiles::saveInfoFile(const std::string& prefix)
 void SuperKmerBinFiles::openFile( const char* mode, int fileId)
 {
 	std::stringstream ss;
-	ss << _basefilename << "." << fileId << ".lz4";
-
-	if (mode == "rb")
-		_inputs[fileId] = new lz4_stream::istream(_path + "/" + ss.str());
-	else if (mode == "wb")
+	ss << _basefilename << "." << fileId;
+	
+	if (_lz4)
 	{
-		_foutputs[fileId] = new ofstream(_path + "/" + ss.str(), ios::binary | ios::out);
-		_outputs[fileId] = new lz4_stream::ostream(*_foutputs[fileId]);
+		ss << ".lz4";
+		if (mode == "rb")
+			_inputs[fileId] = new lz4_stream::istream(_path + "/" + ss.str());
+		else if (mode == "wb")
+		{
+			_foutputs[fileId] = new ofstream(_path + "/" + ss.str(), ios::binary | ios::out);
+			_outputs[fileId] = new lz4_stream::ostream(*_foutputs[fileId]);
+		}
 	}
-	//_files[fileId] = system::impl::System::file().newFile (_path, ss.str(), mode);
+	else
+	{
+		_files[fileId] = system::impl::System::file().newFile (_path, ss.str(), mode);
+	}
 	_synchros[fileId] = system::impl::System::thread().newSynchronizer();
 	_synchros[fileId]->use();
 }
@@ -398,18 +404,24 @@ void SuperKmerBinFiles::openFiles( const char* mode)
 	for(unsigned int ii=0;ii<_files.size();ii++)
 	{
 		std::stringstream ss;
-		ss << _basefilename << "." << ii << ".lz4";
-		
-		if (mode == "rb")
+		ss << _basefilename << "." << ii;
+		if (_lz4)
 		{
-			_inputs[ii] = new lz4_stream::istream(_path + "/" + ss.str());
+			ss << ".lz4";
+			if (mode == "rb")
+			{
+				_inputs[ii] = new lz4_stream::istream(_path + "/" + ss.str());
+			}
+			else if (mode == "wb")
+			{
+				_foutputs[ii] = new ofstream(_path + "/" + ss.str(), ios::binary | ios::out);
+				_outputs[ii] = new lz4_stream::ostream(*_foutputs[ii]);
+			}
 		}
-		else if (mode == "wb")
+		else
 		{
-			_foutputs[ii] = new ofstream(_path + "/" + ss.str(), ios::binary | ios::out);
-			_outputs[ii] = new lz4_stream::ostream(*_foutputs[ii]);
+			_files[ii] = system::impl::System::file().newFile (_path, ss.str(), mode);
 		}
-		//_files[ii] = system::impl::System::file().newFile (_path, ss.str(), mode);
 		_synchros[ii] = system::impl::System::thread().newSynchronizer();
 		_synchros[ii]->use();
 
@@ -431,16 +443,21 @@ int SuperKmerBinFiles::readBlock(unsigned char ** block, unsigned int* max_block
 {
 	_synchros[file_id]->lock();
 	
-	if (!_inputs[file_id])
+	int nbr;
+	if (_lz4)
 	{
-		openFile("rb", file_id);
+		if (!_inputs[file_id])
+		{
+			openFile("rb", file_id);
+		}
+	_inputs[file_id]->read((char*)nb_bytes_read, sizeof(*max_block_size));
+	nbr = _inputs[file_id]->gcount();
+	}
+	else
+	{
+		nbr = _files[file_id]->fread(nb_bytes_read, sizeof(*max_block_size),1);
 	}
 	
-	//block header
-	//int nbr = _files[file_id]->fread(nb_bytes_read, sizeof(*max_block_size),1);
-	_inputs[file_id]->read((char*)nb_bytes_read, sizeof(*max_block_size));
-	int nbr = _inputs[file_id]->gcount();
-
 	if(nbr == 0)
 	{
 		//printf("__ end of file %i __\n",file_id);
@@ -455,8 +472,10 @@ int SuperKmerBinFiles::readBlock(unsigned char ** block, unsigned int* max_block
 	}
 	
 	//block
-	//_files[file_id]->fread(*block, sizeof(unsigned char),*nb_bytes_read);
-	_inputs[file_id]->read((char*)*block, *nb_bytes_read);
+	if (_lz4)
+		_inputs[file_id]->read((char*)*block, *nb_bytes_read);
+	else
+		_files[file_id]->fread(*block, sizeof(unsigned char),*nb_bytes_read);
 	
 	_synchros[file_id]->unlock();
 	
@@ -501,12 +520,17 @@ void SuperKmerBinFiles::writeBlock(unsigned char * block, unsigned int block_siz
 	_nbKmerperFile[file_id]+=nbkmers;
 	_FileSize[file_id] += block_size+sizeof(block_size);
 	//block header
-	//_files[file_id]->fwrite(&block_size, sizeof(block_size),1);
-	_outputs[file_id]->write((char*)&block_size, sizeof(block_size));
+	if (_lz4)
+		_outputs[file_id]->write((char*)&block_size, sizeof(block_size));
+	else
+		_files[file_id]->fwrite(&block_size, sizeof(block_size),1);
 
 	//block
-	//_files[file_id]->fwrite(block, sizeof(unsigned char),block_size);
-	_outputs[file_id]->write((char*)block, block_size);
+	if (_lz4)
+		_outputs[file_id]->write((char*)block, block_size);
+	else
+		_files[file_id]->fwrite(block, sizeof(unsigned char),block_size);
+	
 	_synchros[file_id]->unlock();
 
 }
@@ -517,10 +541,12 @@ void SuperKmerBinFiles::flushFiles()
 	{
 		_synchros[ii]->lock();
 
-		if(_outputs[ii]!=0)
+		if(_outputs[ii]!=0 || _files[ii]!=0)
 		{
-			//_files[ii]->flush();
-			_outputs[ii]->flush();
+			if (_lz4)
+				_outputs[ii]->flush();
+			else
+				_files[ii]->flush();
 		}
 		
 		_synchros[ii]->unlock();
@@ -542,12 +568,12 @@ void SuperKmerBinFiles::eraseFiles()
 
 void SuperKmerBinFiles::closeFile(  int fileId)
 {
-	//if(_files[fileId]!=0)
-	//{
-	//	delete _files[fileId];
-	//	_files[fileId] = 0;
-	//	_synchros[fileId]->forget();
-	//}
+	if(_files[fileId]!=0)
+	{
+		delete _files[fileId];
+		_files[fileId] = 0;
+		_synchros[fileId]->forget();
+	}
 
 	if (_outputs[fileId]!=0)
 	{
@@ -570,12 +596,12 @@ void SuperKmerBinFiles::closeFiles()
 {
 	for(unsigned int ii=0;ii<_files.size();ii++)
 	{
-		//if(_files[ii]!=0)
-		//{
-		//	delete _files[ii];
-		//	_files[ii] = 0;
-		//	_synchros[ii]->forget();
-		//}
+		if(_files[ii]!=0)
+		{
+			delete _files[ii];
+			_files[ii] = 0;
+			_synchros[ii]->forget();
+		}
 		if (_outputs[ii]!=0)
 		{
 			delete _outputs[ii];

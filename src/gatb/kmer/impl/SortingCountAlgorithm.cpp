@@ -1204,7 +1204,7 @@ void SortingCountAlgorithm<span>::fillPartitions (size_t pass, Iterator<Sequence
 				_superKstorage =0;
 			}
 			
-			_superKstorage = new SuperKmerBinFiles(_tmpStorageName_superK,"superKparts", _config._nb_partitions) ;
+			_superKstorage = new SuperKmerBinFiles(_tmpStorageName_superK,"superKparts", _config._nb_partitions, false) ;
 			
 		}
 		/** We update the message of the progress bar. */
