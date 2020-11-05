@@ -321,7 +321,7 @@ SuperKmerBinFiles::SuperKmerBinFiles(const std::string& path,const std::string& 
 }
 
 // Rayan: added for dsk separation into phase1 and phase2
-SuperKmerBinFiles::SuperKmerBinFiles(const std::string& prefix)
+SuperKmerBinFiles::SuperKmerBinFiles(const std::string& prefix, bool lz4) : _lz4(lz4)
 {
     std::ifstream myfile (prefix+"/SuperKmerBinInfoFile");
     std::string line;
