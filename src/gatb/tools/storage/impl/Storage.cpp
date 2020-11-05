@@ -343,6 +343,7 @@ SuperKmerBinFiles::SuperKmerBinFiles(const std::string& prefix, bool lz4) : _lz4
             getline (myfile,line); _nbKmerperFile[ii] = atol(line.c_str());
             getline (myfile,line); _FileSize[ii] = atol(line.c_str());
         }
+		getline (myfile, line); _lz4 = atoi(line.c_str());
         myfile.close();
     }
     else
@@ -364,6 +365,7 @@ void SuperKmerBinFiles::saveInfoFile(const std::string& prefix)
 	myfile << _nbKmerperFile[ii] << "\n";
 	myfile << _FileSize[ii] << "\n";
   }
+  myfile << _lz4 << "\n";
   myfile.close();
 }
 
