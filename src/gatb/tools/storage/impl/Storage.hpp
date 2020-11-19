@@ -45,7 +45,6 @@
 #include <gatb/tools/math/NativeInt8.hpp>
 
 #include <gatb/tools/designpattern/impl/IteratorHelpers.hpp>
-#include <gatb/tools/storage/impl/lz4_stream.hpp>
 
 #include <string>
 #include <sstream>
@@ -284,12 +283,8 @@ private:
 	std::vector<u_int64_t> _FileSize;
 
 	std::vector<system::IFile* > _files;
-    std::vector<ofstream*> _foutputs;
-    std::vector<lz4_stream::ostream*> _outputs;
-    std::vector<lz4_stream::istream*> _inputs;
 	std::vector <system::ISynchronizer*> _synchros;
 	int _nb_files;
-    bool _lz4;
 };
 
 
