@@ -88,8 +88,6 @@ add_library    (gatbcore-static  STATIC  ${ComponentFiles} )
 
 set_target_properties  (gatbcore-static   PROPERTIES OUTPUT_NAME  gatbcore  clean_direct_output 1)
 
-add_dependencies(gatbcore-static LZ4)
-
 #set_target_properties (gatbcore-dynamic  PROPERTIES OUTPUT_NAME  gatbcore  clean_direct_output 1)
 
 ################################################################################

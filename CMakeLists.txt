@@ -213,7 +213,7 @@ find_package(ZLIB)
 set (gatb-core-includes ${ZLIB_INCLUDE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/thirdparty/LZ4/src/LZ4/lib ${PROJECT_BINARY_DIR}/include/${CMAKE_BUILD_TYPE} ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/thirdparty ${gatb-core-extra-libraries-inc})
 
 # We define the libraries used for linking binary based on gatb core
-set (gatb-core-libraries   gatbcore-static  dl  pthread  z ${gatb-core-extra-libraries} lz4)
+set (gatb-core-libraries   gatbcore-static  dl  pthread  z ${gatb-core-extra-libraries})
 
 # We define the directory where to find cmake helpers
 set (gatb-core-cmake  ${CMAKE_MODULE_PATH})
